@@ -370,25 +370,33 @@ export default function ComplexTable(props) {
     });
   };
   const deletedConfirmation = async (obj) => {
-    let object = JSON.parse(JSON.stringify(obj));
-    object.totalAmmount = 0;
-    object.paymentOption = '';
-    object.partialPayment = 0;
-    object.balance = 0;
-    setisDelete(null);
-    obj.Cart.map(async (val) => {
-      await fetchAvailableProductbyID(val.id).then(async (response) => {
-        let datafromResponse = response;
-        datafromResponse.quantity =
-          Number(response.quantity) + Number(val.buyingQty);
-       await updateInAvailableProductbyIDPutBack(datafromResponse, val.id);
-      });
-    });
+  const clonedObj = JSON.parse(JSON.stringify(obj));
 
-   await deleteAvailableDueBalance(object, obj.id).then((response) => {
-      props.refreshTable();
-    });
-  };
+  clonedObj.totalAmmount = 0;
+  clonedObj.paymentOption = '';
+  clonedObj.partialPayment = 0;
+  clonedObj.balance = 0;
+
+  setisDelete(null);
+
+  // Wait for all product updates before deleting
+  await Promise.all(
+    obj.Cart.map(async (item) => {
+      const response = await fetchAvailableProductbyID(item.id);
+      const updatedProduct = {
+        ...response,
+        quantity: Number(response.quantity) + Number(item.buyingQty),
+      };
+      return updateInAvailableProductbyIDPutBack(updatedProduct, item.id);
+    })
+  );
+
+  // Delete only after all updates complete
+  await deleteAvailableDueBalance(clonedObj, obj.id);
+
+  // Refresh table
+  props.refreshTable();
+};
   const onChangeUpdateText = (val, state) => {
     let obj = {
       ...isUpdate,
