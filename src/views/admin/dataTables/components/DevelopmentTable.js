@@ -369,23 +369,23 @@ export default function ComplexTable(props) {
       props.refreshTable();
     });
   };
-  const deletedConfirmation = (obj) => {
+  const deletedConfirmation = async (obj) => {
     let object = JSON.parse(JSON.stringify(obj));
     object.totalAmmount = 0;
     object.paymentOption = '';
     object.partialPayment = 0;
     object.balance = 0;
     setisDelete(null);
-    obj.Cart.map((val) => {
-      fetchAvailableProductbyID(val.id).then((response) => {
+    obj.Cart.map(async (val) => {
+     await fetchAvailableProductbyID(val.id).then(async (response) => {
         let datafromResponse = response;
         datafromResponse.quantity =
           Number(response.quantity) + Number(val.buyingQty);
-        updateInAvailableProductbyIDPutBack(datafromResponse, val.id);
+          await updateInAvailableProductbyIDPutBack(datafromResponse, val.id);
       });
     });
 
-    deleteAvailableDueBalance(object, obj.id).then((response) => {
+    await deleteAvailableDueBalance(object, obj.id).then((response) => {
       props.refreshTable();
     });
   };
