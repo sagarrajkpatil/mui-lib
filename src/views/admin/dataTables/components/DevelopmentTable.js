@@ -376,6 +376,7 @@ export default function ComplexTable(props) {
   clonedObj.paymentOption = '';
   clonedObj.partialPayment = 0;
   clonedObj.balance = 0;
+  clonedObj.Cart = null;
 
   setisDelete(null);
 
